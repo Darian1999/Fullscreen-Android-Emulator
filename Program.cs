@@ -28,6 +28,19 @@ public class FullscreenManager
 
             if (hWnd != IntPtr.Zero)
             {
+                // Check for Android Studio and apply optimizations
+                Process[] studioProcesses = Process.GetProcessesByName("studio64");
+                if (studioProcesses.Length == 0)
+                {
+                    studioProcesses = Process.GetProcessesByName("studio");
+                }
+
+                if (studioProcesses.Length > 0)
+                {
+                    Console.WriteLine("Android Studio detected. Applying optimizations.");
+                    AndroidStudioOptimizations.Apply(hWnd);
+                }
+
                 // Get screen dimensions
                 int screenWidth = GetSystemMetrics(Vars.SM_CXSCREEN);
                 int screenHeight = GetSystemMetrics(Vars.SM_CYSCREEN);
@@ -56,11 +69,23 @@ public class FullscreenManager
     // Example usage:
     public static void Main()
     {
-        // Start notepad for demonstration purposes
-        Process.Start("notepad.exe");
-        System.Threading.Thread.Sleep(1000); // Wait for notepad to open
+        Process[] processes = Process.GetProcessesByName("qemu-system-x86_64");
+        string processName = "qemu-system-x86_64";
 
-        // The process name for Notepad is "notepad" (without .exe)
-        ForceFullscreen("notepad");
+        if (processes.Length == 0)
+        {
+            Console.WriteLine("Process 'qemu-system-x86_64' not found, looking for 'qemu-system-i386'.");
+            processes = Process.GetProcessesByName("qemu-system-i386");
+            processName = "qemu-system-i386";
+        }
+
+        if (processes.Length > 0)
+        {
+            ForceFullscreen(processName);
+        }
+        else
+        {
+            Console.WriteLine("No QEMU instance found (looked for qemu-system-x86_64 and qemu-system-i386).");
+        }
     }
 }
